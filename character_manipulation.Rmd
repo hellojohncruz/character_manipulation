@@ -5,7 +5,49 @@ date: "2023-02-06"
 output: html_document
 ---
 
-#1. Using the 173 majors listed in fivethirtyeight.com’s College Majors dataset [https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/], provide code that identifies the majors that contain either "DATA" or "STATISTICS"
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r library, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(rvest)
+```
+
+---
+
+Using the 173 majors listed in fivethirtyeight.com’s College Majors [dataset](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), provide code that identifies the majors that contain either "DATA" or "STATISTICS"
+
+```{r website-table, warning=FALSE, message=FALSE}
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv"
+df <- read_csv(url)
+```
+
+## Method 1
+```{r method-1, warning=FALSE, message=FALSE}
+word_search <- list("statistics", "data")
+majors_data_stats <- list()
+
+for (word in word_search){
+  majors_data_stats <- append(majors_data_stats, grep(word, df$Major, ignore.case = TRUE, value = TRUE))
+}
+
+print(majors_data_stats)
+```
+
+```{r method-2, warning=FALSE, message=FALSE}
+## Method 2
+df %>%
+  filter(str_detect(Major, regex("statistics|data", ignore_case = TRUE)))
+```
+
+---
 
 #2 Write code that transforms the data below:
 
@@ -35,43 +77,3 @@ The two exercises below are taken from R for Data Science, 14.3.5.1 in the on-li
 Start and end with the same character.
 Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
 Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r library, message=FALSE, warning=FALSE}
-library(tidyverse)
-library(rvest)
-```
-
-
-```{r website-table, warning=FALSE, message=FALSE}
-url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv"
-df <- read_csv(url)
-```
-
-## Method 1
-```{r method-1, warning=FALSE, message=FALSE}
-word_search <- list("statistics", "data")
-majors_data_stats <- list()
-
-for (word in word_search){
-  majors_data_stats <- append(majors_data_stats, grep(word, df$Major, ignore.case = TRUE, value = TRUE))
-}
-
-print(majors_data_stats)
-```
-
-```{r method-2, warning=FALSE, message=FALSE}
-## Method 2
-df %>%
-  filter(str_detect(Major, regex("statistics|data", ignore_case = TRUE)))
-```
-
