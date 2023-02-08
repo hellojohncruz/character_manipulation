@@ -62,6 +62,23 @@ Into a format like this:
 
 c("bell pepper", "bilberry", "blackberry", "blood orange", "blueberry", "cantaloupe", "chili pepper", "cloudberry", "elderberry", "lime", "lychee", "mulberry", "olive", "salal berry")
 
+``` {r transform-string}
+
+start_str <- '[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+
+[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"  
+
+[9] "elderberry"   "lime"         "lychee"       "mulberry"    
+
+[13] "olive"        "salal berry"'
+
+print(start_str)
+
+remove_chars <- str_replace_all(start_str, '[[0-9][:punct:]\n]', '')
+print(remove_chars)
+
+```
+
 ---
 
 ## Question 3
