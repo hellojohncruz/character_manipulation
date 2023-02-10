@@ -62,20 +62,36 @@ Into a format like this:
 
 c("bell pepper", "bilberry", "blackberry", "blood orange", "blueberry", "cantaloupe", "chili pepper", "cloudberry", "elderberry", "lime", "lychee", "mulberry", "olive", "salal berry")
 
-``` {r transform-string}
+``` {r transform-string, warning=FALSE}
 
-start_str <- '[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+start_str <- '[1] "bell pepper" "bilberry"   "blackberry"  "blood orange"
+[5] "blueberry"  "cantaloupe"  "chili pepper" "cloudberry"
+[9] "elderberry"  "lime"     "lychee"    "mulberry"
+[13] "olive"    "salal berry"'
 
-[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"  
+patterns <- c('\\[' = '', '[0-9]'='', '\\]'='', '\n'='')
+remove_chars <- str_replace_all(start_str, patterns)
+remove_backslash <- str_split(remove_chars, '\\"')
+remove_quotes <- str_split(remove_backslash, '\\"')
 
-[9] "elderberry"   "lime"         "lychee"       "mulberry"    
+df_words <- as.data.frame(str_extract_all(remove_quotes, "(\"\\w*[:blank:]?\\w*\")+", simplify=TRUE))
+df_words <- as.data.frame(df_words[!apply(df_words, 1, function(x) any(x=="")),])
 
-[13] "olive"        "salal berry"'
+df_t <- transpose(df_words)
+df_t <- as.data.frame(lapply(df_t, unlist))
 
-print(start_str)
+df_final <- df_t %>% filter(grepl('[a-zA-Z]', df_t[ , 1]))
 
-remove_chars <- str_replace_all(start_str, '[[0-9][:punct:]\n]', '')
-print(remove_chars)
+update_string <- ''
+
+for (word in df_final){
+  update_string <- paste(update_string, word, collapse = ', ')
+}
+
+update_string <- paste0('c(', update_string) %>%
+  paste0(update_string, ')')
+
+writeLines(update_string)
 
 ```
 
@@ -85,16 +101,29 @@ print(remove_chars)
 Describe, in words, what these expressions will match:
 
 (.)\1\1
-"(.)(.)\\2\\1"
-(..)\1
-"(.).\\1.\\1"
-"(.)(.)(.).*\\3\\2\\1"
+Same character repeated three times
 
+"(.)(.)\\2\\1"
+Two consecutive characters that is backwards
+
+(..)\1
+Two same characters repeated
+
+"(.).\\1.\\1"
+Every other character should be repeated
+
+"(.)(.)(.).*\\3\\2\\1"
+Three characters separated by any number of different repeated characters including none, then the three characters backwards.
 ---
 
 ## Question 4
 Construct regular expressions to match words that:
 
 Start and end with the same character.
+"^(.)((.*\\1)|1?)"
+
 Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+"([A-Za-z][A-Za-z]).*\\1"
+
 Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
+"([A-Za-z]).*\\1.*\\1"
