@@ -41,8 +41,8 @@ print(majors_data_stats)
 ### Method 2
 
 ```{r method-2, warning=FALSE, message=FALSE}
-df %>%
-  filter(str_detect(Major, regex("statistics|data", ignore_case = TRUE)))
+knitr::kable(df %>%
+  filter(str_detect(Major, regex("statistics|data", ignore_case = TRUE))))
 ```
 
 ---
@@ -114,6 +114,7 @@ Every other character should be repeated
 
 "(.)(.)(.).*\\3\\2\\1"
 Three characters separated by any number of different repeated characters including none, then the three characters backwards.
+
 ---
 
 ## Question 4

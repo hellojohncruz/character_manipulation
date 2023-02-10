@@ -392,14 +392,39 @@ print(majors_data_stats)</code></pre>
 </div>
 <div id="method-2" class="section level3">
 <h3>Method 2</h3>
-<pre class="r"><code>df %&gt;%
-  filter(str_detect(Major, regex(&quot;statistics|data&quot;, ignore_case = TRUE)))</code></pre>
-<pre><code>## # A tibble: 3 × 3
-##   FOD1P Major                                         Major_Category         
-##   &lt;chr&gt; &lt;chr&gt;                                         &lt;chr&gt;                  
-## 1 6212  MANAGEMENT INFORMATION SYSTEMS AND STATISTICS Business               
-## 2 2101  COMPUTER PROGRAMMING AND DATA PROCESSING      Computers &amp; Mathematics
-## 3 3702  STATISTICS AND DECISION SCIENCE               Computers &amp; Mathematics</code></pre>
+<pre class="r"><code>knitr::kable(df %&gt;%
+  filter(str_detect(Major, regex(&quot;statistics|data&quot;, ignore_case = TRUE))))</code></pre>
+<table>
+<colgroup>
+<col width="7%" />
+<col width="60%" />
+<col width="31%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">FOD1P</th>
+<th align="left">Major</th>
+<th align="left">Major_Category</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">6212</td>
+<td align="left">MANAGEMENT INFORMATION SYSTEMS AND STATISTICS</td>
+<td align="left">Business</td>
+</tr>
+<tr class="even">
+<td align="left">2101</td>
+<td align="left">COMPUTER PROGRAMMING AND DATA PROCESSING</td>
+<td align="left">Computers &amp; Mathematics</td>
+</tr>
+<tr class="odd">
+<td align="left">3702</td>
+<td align="left">STATISTICS AND DECISION SCIENCE</td>
+<td align="left">Computers &amp; Mathematics</td>
+</tr>
+</tbody>
+</table>
 <hr />
 </div>
 </div>
@@ -414,21 +439,57 @@ print(majors_data_stats)</code></pre>
 <p>c(“bell pepper”, “bilberry”, “blackberry”, “blood orange”,
 “blueberry”, “cantaloupe”, “chili pepper”, “cloudberry”, “elderberry”,
 “lime”, “lychee”, “mulberry”, “olive”, “salal berry”)</p>
+<pre class="r"><code>start_str &lt;- &#39;[1] &quot;bell pepper&quot; &quot;bilberry&quot;   &quot;blackberry&quot;  &quot;blood orange&quot;
+[5] &quot;blueberry&quot;  &quot;cantaloupe&quot;  &quot;chili pepper&quot; &quot;cloudberry&quot;
+[9] &quot;elderberry&quot;  &quot;lime&quot;     &quot;lychee&quot;    &quot;mulberry&quot;
+[13] &quot;olive&quot;    &quot;salal berry&quot;&#39;
+
+patterns &lt;- c(&#39;\\[&#39; = &#39;&#39;, &#39;[0-9]&#39;=&#39;&#39;, &#39;\\]&#39;=&#39;&#39;, &#39;\n&#39;=&#39;&#39;)
+remove_chars &lt;- str_replace_all(start_str, patterns)
+remove_backslash &lt;- str_split(remove_chars, &#39;\\&quot;&#39;)
+remove_quotes &lt;- str_split(remove_backslash, &#39;\\&quot;&#39;)
+
+df_words &lt;- as.data.frame(str_extract_all(remove_quotes, &quot;(\&quot;\\w*[:blank:]?\\w*\&quot;)+&quot;, simplify=TRUE))
+df_words &lt;- as.data.frame(df_words[!apply(df_words, 1, function(x) any(x==&quot;&quot;)),])
+
+df_t &lt;- transpose(df_words)
+df_t &lt;- as.data.frame(lapply(df_t, unlist))
+
+df_final &lt;- df_t %&gt;% filter(grepl(&#39;[a-zA-Z]&#39;, df_t[ , 1]))
+
+update_string &lt;- &#39;&#39;
+
+for (word in df_final){
+  update_string &lt;- paste(update_string, word, collapse = &#39;, &#39;)
+}
+
+update_string &lt;- paste0(&#39;c(&#39;, update_string) %&gt;%
+  paste0(update_string, &#39;)&#39;)
+
+writeLines(update_string)</code></pre>
+<pre><code>## c( &quot;bell pepper&quot;,  &quot;bilberry&quot;,  &quot;blackberry&quot;,  &quot;blood orange&quot;,  &quot;blueberry&quot;,  &quot;cantaloupe&quot;,  &quot;chili pepper&quot;,  &quot;cloudberry&quot;,  &quot;elderberry&quot;,  &quot;lime&quot;,  &quot;lychee&quot;,  &quot;mulberry&quot;,  &quot;olive&quot;,  &quot;salal berry&quot; &quot;bell pepper&quot;,  &quot;bilberry&quot;,  &quot;blackberry&quot;,  &quot;blood orange&quot;,  &quot;blueberry&quot;,  &quot;cantaloupe&quot;,  &quot;chili pepper&quot;,  &quot;cloudberry&quot;,  &quot;elderberry&quot;,  &quot;lime&quot;,  &quot;lychee&quot;,  &quot;mulberry&quot;,  &quot;olive&quot;,  &quot;salal berry&quot;)</code></pre>
 <hr />
 </div>
 <div id="question-3" class="section level2">
 <h2>Question 3</h2>
 <p>Describe, in words, what these expressions will match:</p>
-<p>(.)\1\1 “(.)(.)\2\1” (..)\1 “(.).\1.\1” “(.)(.)(.).*\3\2\1”</p>
+<p>(.)\1\1 Same character repeated three times</p>
+<p>“(.)(.)\2\1” Two consecutive characters that is backwards</p>
+<p>(..)\1 Two same characters repeated</p>
+<p>“(.).\1.\1” Every other character should be repeated</p>
+<p>“(.)(.)(.).*\3\2\1” Three characters separated by any number of
+different repeated characters including none, then the three characters
+backwards.</p>
 <hr />
 </div>
 <div id="question-4" class="section level2">
 <h2>Question 4</h2>
 <p>Construct regular expressions to match words that:</p>
-<p>Start and end with the same character. Contain a repeated pair of
-letters (e.g. “church” contains “ch” repeated twice.) Contain one letter
-repeated in at least three places (e.g. “eleven” contains three
-“e”s.)</p>
+<p>Start and end with the same character. “^(.)((.*\1)|1?)”</p>
+<p>Contain a repeated pair of letters (e.g. “church” contains “ch”
+repeated twice.) “([A-Za-z][A-Za-z]).*\1”</p>
+<p>Contain one letter repeated in at least three places (e.g. “eleven”
+contains three “e”s.) “([A-Za-z]).<em>\1.</em>\1”</p>
 </div>
 
 
